@@ -1,26 +1,14 @@
 import { app, shell, BrowserWindow } from 'electron'
 import path from 'node:path'
-import { createFileRoute, createURLRoute } from 'electron-router-dom'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-
-import { createTray } from './tray'
-import { createShortcuts } from './shortcuts'
-
-import './ipc'
-import './store'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    width: 1120,
-    height: 700,
+    width: 400,
+    height: 670,
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#17141f',
-    titleBarStyle: 'hiddenInset',
-    trafficLightPosition: {
-      x: 20,
-      y: 20,
-    },
     ...(process.platform === 'linux'
       ? {
           icon: path.join(__dirname, '../../build/icon.png'),
@@ -32,9 +20,6 @@ function createWindow(): void {
     },
   })
 
-  createTray(mainWindow)
-  createShortcuts(mainWindow)
-
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
@@ -44,20 +29,10 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  const devServerURL = createURLRoute(
-    process.env.ELECTRON_RENDERER_URL!,
-    'main',
-  )
-
-  const fileRoute = createFileRoute(
-    path.join(__dirname, '../renderer/index.html'),
-    'main',
-  )
-
   if (is.dev && process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(devServerURL)
+    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
   } else {
-    mainWindow.loadFile(...fileRoute)
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
 }
 
